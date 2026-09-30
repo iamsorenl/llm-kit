@@ -18,7 +18,7 @@ export class LlmError extends Error {
   }
 }
 
-export type Message = { role: "system" | "user" | "assistant"; content: string };
+export type Message = { role: string; content: string }; // "system" | "user" | "assistant" | "tool" ...
 
 // Token counts are 0 when the provider reported none, never "the call was free".
 export type Reply = { content: string; inTokens: number; outTokens: number; ms: number };
