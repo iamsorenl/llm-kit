@@ -1,0 +1,27 @@
+{
+  "name": "llm-kit",
+  "version": "0.1.0",
+  "description": "Small, dependency-free LLM call helpers: Ollama, any OpenAI-compatible endpoint, JSON reply parsing, free-model guard.",
+  "type": "module",
+  "license": "MIT",
+  "repository": "github:iamsorenl/llm-kit",
+  "engines": { "node": ">=20" },
+  "exports": {
+    ".": { "types": "./dist/index.d.ts", "default": "./dist/index.js" },
+    "./ollama": { "types": "./dist/ollama.d.ts", "default": "./dist/ollama.js" },
+    "./openai-compat": { "types": "./dist/openai-compat.d.ts", "default": "./dist/openai-compat.js" },
+    "./json": { "types": "./dist/json.d.ts", "default": "./dist/json.js" },
+    "./guard": { "types": "./dist/guard.d.ts", "default": "./dist/guard.js" }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc",
+    "prepare": "tsc",
+    "test": "node --test src/*.test.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^24",
+    "typescript": "^5.9"
+  }
+}
