@@ -1,6 +1,6 @@
 {
   "name": "llm-kit",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Small, dependency-free LLM call helpers: Ollama, any OpenAI-compatible endpoint, JSON reply parsing, free-model guard.",
   "type": "module",
   "license": "MIT",

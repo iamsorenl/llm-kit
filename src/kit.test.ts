@@ -66,6 +66,17 @@ test("compatChat sends auth + json mode, and retries without json mode on 400", 
   assert.equal(seen.at(-1).auth, "Bearer k");
 });
 
+test("compatChat downgrades JSON mode on 422 but not on 429", async () => {
+  let calls = 0;
+  handler = (_req, body) => { calls++; return body.response_format ? { status: 422, body: {} } : { status: 200, body: { choices: [{ message: { content: "ok" } }] } }; };
+  assert.equal((await compatChat(msgs, { baseUrl: base, model: "m", json: true })).content, "ok");
+  assert.equal(calls, 2);
+  calls = 0;
+  handler = () => { calls++; return { status: 429, body: {} }; };
+  await assert.rejects(compatChat(msgs, { baseUrl: base, model: "m", json: true }), (e: LlmError) => e.kind === "rate-limit");
+  assert.equal(calls, 1);
+});
+
 test("compatChat maps status codes and missing key", async () => {
   await assert.rejects(compatChat(msgs, { baseUrl: base, model: "m", apiKey: "" }), (e: LlmError) => e.kind === "no-key");
   for (const [status, kind] of [[401, "auth"], [429, "rate-limit"], [503, "api"]] as const) {

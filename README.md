@@ -7,7 +7,7 @@ Take all of it or one piece:
 | Piece | TypeScript | Python | What it does |
 |---|---|---|---|
 | Ollama client | `llm-kit/ollama` → `ollamaChat` | `ollama_chat` | `/api/chat` with structured output (`format`), `think`, `num_ctx`, token counts, timing |
-| OpenAI-compatible client | `llm-kit/openai-compat` → `compatChat` | `compat_chat` | Groq, OpenRouter, Gemini, Ollama `/v1`, anything speaking `/chat/completions`. Retries once without JSON mode if the model rejects it |
+| OpenAI-compatible client | `llm-kit/openai-compat` → `compatChat` | `compat_chat` | Groq, OpenRouter, Gemini, Ollama `/v1`, anything speaking `/chat/completions`. Retries once without JSON mode if the model rejects it (any 4xx but 401, 403, 429) |
 | JSON reply parsing | `llm-kit/json` → `parseJsonReply` | `parse_json_reply` | Strips ``` fences, parses, runs your validator, returns an error string you can feed back to the model |
 | Free-model guard | `llm-kit/guard` → `assertFreeModel` | `assert_free_model` | Throws if a model id looks paid (gpt-4/5, claude, o1/o3/o4). A tripwire, not a price list |
 | Daily cap | | `DailyCap` | In-memory per-UTC-day call counter for free-tier quotas |

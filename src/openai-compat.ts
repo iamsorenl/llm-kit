@@ -12,7 +12,7 @@ export type CompatOptions = {
   model: string;
   // undefined = send no auth header (local servers). "" = a key is required but missing.
   apiKey?: string;
-  json?: boolean; // ask for response_format json_object; retried without it on a 400
+  json?: boolean; // ask for response_format json_object; retried without it on a 4xx other than 401/403/429
   temperature?: number;
   timeoutMs?: number; // default 60s
   extraBody?: Record<string, unknown>;
@@ -45,8 +45,9 @@ export async function compatChat(messages: Message[], opts: CompatOptions): Prom
 
   const started = performance.now();
   let res = await send(!!opts.json);
-  // Some models/providers reject JSON mode; a plain retry beats failing the call.
-  if (opts.json && res.status === 400) res = await send(false);
+  // Some models/providers reject JSON mode (400 on most, 404/422 on some OpenRouter free
+  // models); a plain retry beats failing the call. Auth and rate limits won't change on retry.
+  if (opts.json && res.status >= 400 && res.status < 500 && ![401, 403, 429].includes(res.status)) res = await send(false);
   const ms = performance.now() - started;
 
   if (res.status === 401 || res.status === 403) throw new LlmError("auth", `${opts.baseUrl} rejected the API key (${res.status})`, res.status);

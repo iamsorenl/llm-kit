@@ -17,7 +17,7 @@ def compat_chat(
     base_url: str,
     model: str,
     api_key: str | None = None,  # None = no auth header (local). "" = required but missing.
-    json_mode: bool = False,  # retried without response_format on a 400
+    json_mode: bool = False,  # retried without response_format on a 4xx other than 401/403/429
     temperature: float = 0.0,
     timeout: float = 60.0,
     extra_body: dict | None = None,
@@ -34,7 +34,9 @@ def compat_chat(
         return post_json(url, {**body, **(extra_body or {})}, timeout, headers)
 
     status, text, ms = send(json_mode)
-    if json_mode and status == 400:  # some models reject JSON mode; a plain retry beats failing
+    # Some models reject JSON mode (400 on most, 404/422 on some OpenRouter free models);
+    # a plain retry beats failing. Auth and rate limits won't change on retry.
+    if json_mode and 400 <= status < 500 and status not in (401, 403, 429):
         status, text, ms2 = send(False)
         ms += ms2
 

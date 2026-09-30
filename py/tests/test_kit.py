@@ -82,6 +82,21 @@ class KitTest(unittest.TestCase):
         self.assertEqual(STATE["seen"][-1]["auth"], "Bearer k")
         self.assertEqual(STATE["seen"][-1]["path"], "/chat/completions")
 
+    def test_compat_downgrade_422_not_429(self):
+        calls = []
+
+        def h(b):
+            calls.append(b)
+            return (422, {}, False) if "response_format" in b else (200, {"choices": [{"message": {"content": "ok"}}]}, False)
+
+        STATE["handler"] = h
+        self.assertEqual(compat_chat(self.msgs, base_url=self.base, model="m", json_mode=True).content, "ok")
+        self.assertEqual(len(calls), 2)
+        calls.clear()
+        STATE["handler"] = lambda b: (calls.append(b), (429, {}, False))[1]
+        self.assertEqual(self.kind(lambda: compat_chat(self.msgs, base_url=self.base, model="m", json_mode=True)), "rate-limit")
+        self.assertEqual(len(calls), 1)
+
     def test_compat_errors(self):
         self.assertEqual(self.kind(lambda: compat_chat(self.msgs, base_url=self.base, model="m", api_key="")), "no-key")
         for status, kind in [(401, "auth"), (429, "rate-limit"), (503, "api")]:
